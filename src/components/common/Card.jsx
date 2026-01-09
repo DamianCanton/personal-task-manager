@@ -1,56 +1,59 @@
-import { forwardRef } from 'react';
+import { forwardRef } from "react";
+import { motion } from "framer-motion";
 
-const Card = forwardRef(({
-  children,
-  variant = 'elevated',
-  className = '',
-  padding = 'medium',
-  interactive = false,
-  ...props
-}, ref) => {
-  const baseStyles = `
-    relative overflow-hidden rounded-lg
-    bg-surface-1 text-md-on-surface-dark
-    transition-shadow duration-md-medium
+const Card = forwardRef(
+  (
+    {
+      children,
+      variant = "default",
+      className = "",
+      padding = "medium",
+      interactive = false,
+      ...props
+    },
+    ref
+  ) => {
+    const baseStyles = `
+    relative overflow-hidden
+    bg-surface rounded-3xl border border-border-subtle
+    text-primary-text
+    transition-all duration-300 ease-out
   `;
 
-  const paddingStyles = {
-    none: '',
-    small: 'p-3',
-    medium: 'p-4',
-    large: 'p-6',
-  };
+    const paddingStyles = {
+      none: "",
+      small: "p-4",
+      medium: "p-6",
+      large: "p-8",
+    };
 
-  const variantStyles = {
-    elevated: 'shadow-md-1',
-    filled: '',
-    outlined: 'border border-md-outline-dark',
-    'outlined-interactive': 'border border-md-outline-dark hover:border-md-primary-dark',
-  };
+    const interactiveStyles = interactive
+      ? "hover:border-white/20 hover:-translate-y-[1px] cursor-pointer"
+      : "";
 
-  const interactiveStyles = interactive
-    ? `
-      cursor-pointer
-      hover:shadow-md-3
-      active:shadow-md-1
-      state-layer
-    `
-    : '';
+    // Variants can be simple now as "Bento" is the main style
+    const variantStyles = {
+      default: "",
+      highlight: "bg-surface-highlight",
+      ghost: "bg-transparent border-transparent",
+    };
 
-  return (
-    <div
-      ref={ref}
-      className={`${baseStyles} ${paddingStyles[padding]} ${variantStyles[variant]} ${interactiveStyles} ${className}`}
-      {...props}
-    >
-      {children}
-      {interactive && (
-        <div className="state-layer bg-current opacity-0" />
-      )}
-    </div>
-  );
-});
+    return (
+      <motion.div
+        ref={ref}
+        className={`${baseStyles} ${paddingStyles[padding]} ${variantStyles[variant]} ${interactiveStyles} ${className}`}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }} // smooth ease
+        whileTap={interactive ? { scale: 0.99 } : {}}
+        {...props}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+);
 
-Card.displayName = 'Card';
+Card.displayName = "Card";
 
 export default Card;

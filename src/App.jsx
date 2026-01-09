@@ -1,21 +1,21 @@
-import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { TaskProvider } from './context/TaskContext';
-import { useTasks } from './hooks/useTasks';
-import { useStats } from './hooks/useStats';
-import { getPrettyDate, getTomorrow, getToday } from './utils/dateHelpers';
-import TabBar from './components/layout/TabBar';
-import DayNavigator from './components/tasks/DayNavigator';
-import TaskList from './components/tasks/TaskList';
-import Header from './components/layout/Header';
-import StatsOverview from './components/stats/StatsOverview';
-import HabitStats from './components/stats/HabitStats';
-import CompletionChart from './components/stats/CompletionChart';
-import CategoryChart from './components/stats/CategoryChart';
-import Modal from './components/common/Modal';
-import TaskForm from './components/tasks/TaskForm';
-import ProgressBar from './components/common/ProgressBar';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import { TaskProvider } from "./context/TaskContext";
+import { useTasks } from "./hooks/useTasks";
+import { useStats } from "./hooks/useStats";
+import { getPrettyDate, getTomorrow, getToday } from "./utils/dateHelpers";
+import TabBar from "./components/layout/TabBar";
+import DayNavigator from "./components/tasks/DayNavigator";
+import TaskList from "./components/tasks/TaskList";
+import Header from "./components/layout/Header";
+import StatsOverview from "./components/stats/StatsOverview";
+import HabitStats from "./components/stats/HabitStats";
+import CompletionChart from "./components/stats/CompletionChart";
+import CategoryChart from "./components/stats/CategoryChart";
+import Modal from "./components/common/Modal";
+import TaskForm from "./components/tasks/TaskForm";
+import ProgressBar from "./components/common/ProgressBar";
+import { AnimatePresence, motion } from "framer-motion";
 
 function DailyView({ onEditTask }) {
   const { currentDate, todayTasks, toggleTask, deleteTask } = useTasks();
@@ -25,7 +25,7 @@ function DailyView({ onEditTask }) {
       : 0;
 
   const handleDelete = (task) => {
-    if (window.confirm('¿Eliminar esta tarea permanentemente?')) {
+    if (window.confirm("¿Eliminar esta tarea permanentemente?")) {
       deleteTask(currentDate, task.id);
     }
   };
@@ -75,7 +75,10 @@ function StatsView() {
         <StatsOverview {...stats} />
         <CompletionChart data={stats.weeklyCompletion} />
         <CategoryChart data={stats.categoryDistribution} />
-        <HabitStats habitStats={stats.habitStats} weeklyHabitProgress={stats.weeklyHabitProgress} />
+        <HabitStats
+          habitStats={stats.habitStats}
+          weeklyHabitProgress={stats.weeklyHabitProgress}
+        />
       </div>
     </motion.div>
   );
@@ -95,10 +98,10 @@ function TaskModal({ isOpen, onClose, targetDate, initialTask }) {
   };
 
   const title = initialTask
-    ? 'Editar Tarea'
+    ? "Editar Tarea"
     : targetDate
     ? `Planificar para ${getPrettyDate(targetDate)}`
-    : 'Nueva Tarea';
+    : "Nueva Tarea";
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
@@ -106,21 +109,28 @@ function TaskModal({ isOpen, onClose, targetDate, initialTask }) {
         <TaskForm
           onSubmit={handleTaskSubmit}
           initialValues={initialTask}
-          submitLabel={initialTask ? 'Guardar Cambios' : 'Agregar Tarea'}
+          submitLabel={initialTask ? "Guardar Cambios" : "Agregar Tarea"}
         />
 
         {!initialTask && dayTasks && dayTasks.length > 0 && (
-          <div className="border-t border-md-outline-dark/10 pt-6">
-            <h3 className="text-sm font-medium text-md-on-surface-variant-dark mb-4">
+          <div className="border-t border-white/10 pt-6">
+            <h3 className="text-sm font-medium text-primary-muted mb-4 uppercase tracking-wider text-xs">
               Ya programado
             </h3>
             <div className="space-y-2">
               {dayTasks.map((t) => (
                 <div
                   key={t.id}
-                  className="p-3 rounded-lg bg-surface-2 text-sm text-md-on-surface-variant-dark"
+                  className="p-3 rounded-xl bg-surface-highlight border border-white/5 text-sm text-primary-muted flex items-center gap-2"
                 >
-                  <span className={t.done ? 'line-through' : ''}>{t.title}</span>
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      t.done ? "bg-primary-muted" : "bg-accent-indigo"
+                    }`}
+                  />
+                  <span className={t.done ? "line-through opacity-70" : ""}>
+                    {t.title}
+                  </span>
                 </div>
               ))}
             </div>
@@ -132,7 +142,7 @@ function TaskModal({ isOpen, onClose, targetDate, initialTask }) {
 }
 
 function MainApp() {
-  const [activeTab, setActiveTab] = useState('today');
+  const [activeTab, setActiveTab] = useState("today");
   const [modalState, setModalState] = useState({
     isOpen: false,
     date: null,
@@ -155,16 +165,16 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-md-background-dark font-google text-md-on-surface-dark selection:bg-md-primary-dark/30">
+    <div className="min-h-screen font-sans text-primary-text selection:bg-accent-indigo/30">
       <AnimatePresence mode="wait">
-        {activeTab === 'today' ? (
+        {activeTab === "today" ? (
           <DailyView key="today" onEditTask={openEditModal} />
         ) : (
           <StatsView key="stats" />
         )}
       </AnimatePresence>
 
-      {activeTab === 'today' && (
+      {activeTab === "today" && (
         <motion.button
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -172,10 +182,10 @@ function MainApp() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={openAddModal}
-          className="fixed bottom-24 right-5 w-14 h-14 bg-md-primary-dark text-md-on-primary-dark rounded-full shadow-md-fab flex items-center justify-center z-30"
+          className="fixed bottom-24 right-6 w-14 h-14 bg-white text-black rounded-full shadow-glow-subtle flex items-center justify-center z-30 hover:shadow-lg transition-shadow"
           aria-label="Agregar tarea"
         >
-          <Plus size={24} />
+          <Plus size={26} strokeWidth={2.5} />
         </motion.button>
       )}
 

@@ -1,41 +1,68 @@
-import TaskCard from './TaskCard';
-import { AnimatePresence } from 'framer-motion';
+import TaskCard from "./TaskCard";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function TaskList({ tasks, onToggle, onEdit, onDelete }) {
   if (!tasks || tasks.length === 0) {
     return (
-      <div className="text-center py-16 px-4">
-        <div className="text-6xl mb-4 opacity-30">📝</div>
-        <p className="text-lg font-medium text-md-on-surface-variant-dark mb-2">
-          No hay tareas para este día
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex flex-col items-center justify-center py-20 px-4"
+      >
+        <div className="w-16 h-16 rounded-full bg-surface-highlight flex items-center justify-center mb-4 text-3xl">
+          ✨
+        </div>
+        <p className="text-lg font-medium text-primary-text mb-2 tracking-tight">
+          Tu día está libre
         </p>
-        <p className="text-sm text-md-on-surface-variant-dark/60">
-          ¡Añade una nueva tarea para comenzar!
+        <p className="text-sm text-primary-muted text-center max-w-xs">
+          Disfruta del tiempo libre o añade una nueva tarea para comenzar.
         </p>
-      </div>
+      </motion.div>
     );
   }
 
   const sortedTasks = [...tasks].sort((a, b) => {
     if (a.done === b.done) {
-      return (a.time || '').localeCompare(b.time || '');
+      return (a.time || "").localeCompare(b.time || "");
     }
     return a.done ? 1 : -1;
   });
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 },
+  };
+
   return (
-    <div className="pb-32 px-4 max-w-2xl mx-auto space-y-3">
-      <AnimatePresence mode="popLayout">
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="pb-32 px-4 max-w-2xl mx-auto space-y-3"
+    >
+      <AnimatePresence mode="popLayout" initial={false}>
         {sortedTasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onToggle={onToggle}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
+          <motion.div key={task.id} variants={item} layout>
+            <TaskCard
+              task={task}
+              onToggle={onToggle}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          </motion.div>
         ))}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }

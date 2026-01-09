@@ -1,115 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Material Design 3 - Google Color System */
-  --md-sys-color-primary: #a8c7fa;
-  --md-sys-color-on-primary: #073278;
-  --md-sys-color-primary-container: #c2e7ff;
-  --md-sys-color-on-primary-container: #001d36;
-  
-  --md-sys-color-secondary: #c2e7ff;
-  --md-sys-color-on-secondary: #003258;
-  --md-sys-color-secondary-container: #d1e4ff;
-  --md-sys-color-on-secondary-container: #001d36;
-  
-  --md-sys-color-tertiary: #e8def8;
-  --md-sys-color-on-tertiary: #21005d;
-  --md-sys-color-tertiary-container: #ffd8e4;
-  --md-sys-color-on-tertiary-container: #31111d;
-  
-  --md-sys-color-error: #f2b8b5;
-  --md-sys-color-on-error: #601410;
-  --md-sys-color-error-container: #f9dedc;
-  --md-sys-color-on-error-container: #410e0b;
-  
-  --md-sys-color-background: #000000;
-  --md-sys-color-on-background: #1c1b1f;
-  --md-sys-color-surface: #1c1b1f;
-  --md-sys-color-on-surface: #1c1b1f;
-  --md-sys-color-surface-variant: #e7e0ec;
-  --md-sys-color-on-surface-variant: #49454f;
-  --md-sys-color-outline: #79747e;
-  --md-sys-color-outline-variant: #cac4d0;
-  
-  /* Dark Theme */
-  --md-sys-color-primary-dark: #9badc7;
-  --md-sys-color-on-primary-dark: #003258;
-  --md-sys-color-primary-container-dark: #00497d;
-  --md-sys-color-on-primary-container-dark: #d1e4ff;
-  
-  --md-sys-color-secondary-dark: #9badc7;
-  --md-sys-color-on-secondary-dark: #003258;
-  --md-sys-color-secondary-container-dark: #00497d;
-  --md-sys-color-on-secondary-container-dark: #d1e4ff;
-  
-  --md-sys-color-background-dark: #000000;
-  --md-sys-color-surface-dark: #121212;
-  --md-sys-color-surface-variant-dark: #2b2930;
-  --md-sys-color-on-surface-dark: #e6e1e5;
-  --md-sys-color-on-surface-variant-dark: #c4c7c5;
-  --md-sys-color-outline-dark: #5f5c62;
-  
-  /* Category Colors - Material Tones */
-  --category-work: #a8c7fa;
-  --category-study: #c2e7ff;
-  --category-sport: #c8e6c9;
-  --category-personal: #ffe0b2;
-  
-  /* Elevation System */
-  --md-elevation-1: 0 1px 3px 1px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.3);
-  --md-elevation-2: 0 2px 6px 2px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.3);
-  --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
-  --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,0.15), 0 2px 3px rgba(0,0,0,0.3);
-  --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,0.15), 0 4px 4px rgba(0,0,0,0.3);
-  
-  /* Shape */
-  --md-shape-corner-small: 8px;
-  --md-shape-corner-medium: 12px;
-  --md-shape-corner-large: 16px;
-  --md-shape-corner-extra-large: 28px;
-  --md-shape-corner-full: 9999px;
+  /* Minimal root variables as we use Tailwind Config */
 }
 
 body {
-  background-color: var(--md-sys-color-background-dark);
-  color: var(--md-sys-color-on-surface-dark);
-  font-family: 'Roboto', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  @apply bg-background text-primary-text font-sans antialiased tracking-tight;
+  background-image: radial-gradient(
+      circle at 80% 0%,
+      rgba(129, 140, 248, 0.08),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 20% 100%,
+      rgba(192, 132, 252, 0.08),
+      transparent 40%
+    );
+  background-attachment: fixed;
   min-height: 100vh;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
-/* Material Design 3 Ripple Effect */
-.ripple {
-  position: relative;
-  overflow: hidden;
-}
-
-.ripple::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, currentColor 10%, transparent 10.01%);
-  transform: scale(4);
-  opacity: 0;
-  transition: transform 0.5s, opacity 1s;
-}
-
-.ripple:active::after {
-  transform: scale(0);
-  opacity: 0.3;
-  transition: 0s;
-}
-
-/* Custom Scrollbar */
+/* Subtle Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -117,95 +37,32 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--md-sys-color-outline-dark);
-  border-radius: var(--md-shape-corner-full);
+  @apply bg-surface-highlight rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--md-sys-color-on-surface-variant-dark);
+  @apply bg-primary-muted;
 }
 
 /* Selection */
 ::selection {
-  background: var(--md-sys-color-primary-dark);
-  color: var(--md-sys-color-on-primary-dark);
+  @apply bg-accent-indigo/30 text-white;
 }
 
-/* Focus Ring - Material 3 */
+/* Focus Ring - Minimalist */
 .focus-ring {
   outline: none;
 }
 
 .focus-ring:focus-visible {
-  box-shadow: 0 0 0 2px var(--md-sys-color-background-dark), 0 0 0 4px var(--md-sys-color-primary);
+  box-shadow: 0 0 0 2px #0a0a0a, 0 0 0 4px #e1e1e1;
 }
 
-/* Animation Tokens */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slideDown {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
-}
-
-.animate-slideUp {
-  animation: slideUp 0.3s ease-out;
-}
-
-.animate-slideDown {
-  animation: slideDown 0.3s ease-out;
-}
-
-.animate-scaleIn {
-  animation: scaleIn 0.2s ease-out;
-}
-
-/* Shimmer effect for loading states */
-.shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* State layers */
-.state-layer {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.hover-state:hover .state-layer {
-  opacity: 0.08;
-}
-
-.pressed-state:active .state-layer {
-  opacity: 0.12;
-}
-
-.focused-state:focus-visible .state-layer {
-  opacity: 0.12;
+@layer components {
+  .bento-card {
+    @apply bg-surface rounded-3xl border border-border-subtle transition-all duration-300;
+  }
+  .bento-card:hover {
+    @apply border-border-hover -translate-y-[1px];
+  }
 }
