@@ -1,7 +1,18 @@
+import { useMemo } from 'react';
 import TaskCard from "./TaskCard";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function TaskList({ tasks, onToggle, onEdit, onDelete }) {
+  const sortedTasks = useMemo(() => {
+    if (!tasks || tasks.length === 0) return [];
+    return [...tasks].sort((a, b) => {
+      if (a.done === b.done) {
+        return (a.time || "").localeCompare(b.time || "");
+      }
+      return a.done ? 1 : -1;
+    });
+  }, [tasks]);
+
   if (!tasks || tasks.length === 0) {
     return (
       <motion.div
@@ -21,13 +32,6 @@ export default function TaskList({ tasks, onToggle, onEdit, onDelete }) {
       </motion.div>
     );
   }
-
-  const sortedTasks = [...tasks].sort((a, b) => {
-    if (a.done === b.done) {
-      return (a.time || "").localeCompare(b.time || "");
-    }
-    return a.done ? 1 : -1;
-  });
 
   const container = {
     hidden: { opacity: 0 },

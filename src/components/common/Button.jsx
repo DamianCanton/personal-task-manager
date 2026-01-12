@@ -64,8 +64,6 @@ const Button = forwardRef(
         elevated: "secondary",
       }[variant] || variant;
 
-    const isIcon = size === "icon";
-
     return (
       <motion.button
         ref={ref}

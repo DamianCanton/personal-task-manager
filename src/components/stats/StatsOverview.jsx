@@ -24,10 +24,10 @@ function StatCard({ title, value, icon }) {
       className="flex flex-col items-center justify-center text-center h-full"
     >
       <span className="text-2xl mb-2">{icon}</span>
-      <span className="text-xs font-medium text-md-on-surface-variant-dark uppercase tracking-wide mb-1">
+      <span className="text-xs font-medium text-primary-muted uppercase tracking-wide mb-1">
         {title}
       </span>
-      <span className="text-xl font-medium text-md-primary-dark">{value}</span>
+      <span className="text-xl font-medium text-primary-text">{value}</span>
     </Card>
   );
 }

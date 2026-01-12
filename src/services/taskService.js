@@ -2,14 +2,21 @@ import { mockTasks } from "../data/mockData";
 
 export const taskService = {
   getTasks(date) {
-    const stored = localStorage.getItem(`tasks_${date}`);
-    if (stored) return JSON.parse(stored);
-    // If not stored, return mock data if available
+    try {
+      const stored = localStorage.getItem(`tasks_${date}`);
+      if (stored) return JSON.parse(stored);
+    } catch (error) {
+      console.warn(`Error parsing tasks for ${date}:`, error);
+    }
     return mockTasks[date] || [];
   },
 
   saveTasks(date, tasks) {
-    localStorage.setItem(`tasks_${date}`, JSON.stringify(tasks));
+    try {
+      localStorage.setItem(`tasks_${date}`, JSON.stringify(tasks));
+    } catch (error) {
+      console.warn(`Error saving tasks for ${date}:`, error);
+    }
   },
 
   updateTask(date, updatedTask) {

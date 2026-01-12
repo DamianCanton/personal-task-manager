@@ -36,6 +36,7 @@ const Card = forwardRef(
       default: "",
       highlight: "bg-surface-highlight",
       ghost: "bg-transparent border-transparent",
+      filled: "bg-surface-highlight border-border-subtle",
     };
 
     return (

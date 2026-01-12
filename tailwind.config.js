@@ -30,9 +30,11 @@ export default {
         "md-primary-dark": "#E1E1E1", // Map to primary text
         "md-background-dark": "#0A0A0A", // Map to background
         "md-surface-dark": "#121212", // Map to surface
+        "md-surface-2": "#1E1E1E", // Secondary surface
         "md-on-surface-dark": "#E1E1E1",
         "md-on-surface-variant-dark": "#A1A1A1",
         "md-outline-dark": "rgba(255, 255, 255, 0.08)",
+        "md-error": "#f87171", // Error color for dark theme,
 
         // Category Mappings (Pastel/Muted)
         "category-work": "#818cf8", // Indigo 400

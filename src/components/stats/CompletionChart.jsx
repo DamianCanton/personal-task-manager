@@ -9,9 +9,9 @@ import {
 import Card from '../common/Card';
 
 const COLORS = {
-  high: '#a8c7fa',
-  medium: '#ffe0b2',
-  low: '#f2b8b5',
+  high: '#34d399',
+  medium: '#fb7185',
+  low: '#f87171',
 };
 
 export default function CompletionChart({ data }) {
@@ -23,7 +23,7 @@ export default function CompletionChart({ data }) {
 
   return (
     <Card variant="filled" padding="large" className="mb-6">
-      <h3 className="text-base font-medium text-md-on-surface-dark mb-4 ml-1">
+      <h3 className="text-base font-medium text-primary-text mb-4 ml-1">
         Progreso Semanal
       </h3>
       <div className="h-48 w-full">
@@ -36,7 +36,7 @@ export default function CompletionChart({ data }) {
               dataKey="day"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#c4c7c5' }}
+              tick={{ fontSize: 12, fill: '#A1A1A1' }}
               dy={10}
             />
             <Tooltip
@@ -44,11 +44,11 @@ export default function CompletionChart({ data }) {
               contentStyle={{
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: '#2b2930',
-                boxShadow: '0 4px 8px 3px rgba(0,0,0,0.15)',
+                backgroundColor: '#1E1E1E',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
               }}
-              labelStyle={{ color: '#e6e1e5', marginBottom: '0.25rem' }}
-              itemStyle={{ color: '#c4c7c5' }}
+              labelStyle={{ color: '#E1E1E1', marginBottom: '0.25rem' }}
+              itemStyle={{ color: '#A1A1A1' }}
             />
             <Bar
               dataKey="completion"

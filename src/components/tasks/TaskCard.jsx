@@ -109,7 +109,7 @@ export default function TaskCard({
                     </span>
                   )}
                   {task.time && (
-                    <div className="flex items-center gap-1 text-xs text-primary-muted font-medium ml-auto">
+                    <div className="flex items-center gap-1 text-xs text-primary-muted font-medium mr-20">
                       <Clock size={12} className="flex-shrink-0" />
                       <span>{task.time}</span>
                     </div>

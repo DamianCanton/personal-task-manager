@@ -1,14 +1,41 @@
 export const statsService = {
-  calculateWeeklyCompletion() {
-    return [
-      { day: 'Lun', completion: 85 },
-      { day: 'Mar', completion: 92 },
-      { day: 'Mié', completion: 78 },
-      { day: 'Jue', completion: 88 },
-      { day: 'Vie', completion: 95 },
-      { day: 'Sáb', completion: 70 },
-      { day: 'Dom', completion: 45 },
-    ];
+  calculateWeeklyCompletion(allTasksByDate) {
+    if (!allTasksByDate || Object.keys(allTasksByDate).length === 0) {
+      return [
+        { day: 'Lun', completion: 0 },
+        { day: 'Mar', completion: 0 },
+        { day: 'Mié', completion: 0 },
+        { day: 'Jue', completion: 0 },
+        { day: 'Vie', completion: 0 },
+        { day: 'Sáb', completion: 0 },
+        { day: 'Dom', completion: 0 },
+      ];
+    }
+
+    const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+    const weeklyData = dayNames.map((day, index) => {
+      let totalTasks = 0;
+      let completedTasks = 0;
+
+      Object.entries(allTasksByDate).forEach(([date, tasks]) => {
+        const taskDate = new Date(date);
+        const jsDay = taskDate.getDay();
+        const mappedDay = jsDay === 0 ? 6 : jsDay - 1;
+
+        if (mappedDay === index) {
+          totalTasks += tasks.length;
+          completedTasks += tasks.filter((t) => t.done).length;
+        }
+      });
+
+      return {
+        day,
+        completion: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+      };
+    });
+
+    return weeklyData;
   },
 
   calculateCategoryDistribution(allTasksByDate) {
@@ -93,11 +120,31 @@ export const statsService = {
       const tasks = allTasksByDate[date] || [];
       const habits = tasks.filter((t) => t.isHabit);
 
+      const taskDate = new Date(date);
+      const jsDay = taskDate.getDay();
+      const isWeekend = jsDay === 0 || jsDay === 6;
+
       if (habits.length === 0) {
         if (streak > maxStreak) {
           maxStreak = streak;
         }
         streak = 0;
+        continue;
+      }
+
+      const weekdayHabits = habits.filter((h) => h.habitFrequency === 'weekdays');
+      const otherHabits = habits.filter((h) => h.habitFrequency !== 'weekdays');
+
+      let shouldCountDay = true;
+
+      if (weekdayHabits.length > 0 && otherHabits.length === 0 && isWeekend) {
+        shouldCountDay = false;
+      }
+
+      if (!shouldCountDay) {
+        if (streak > maxStreak) {
+          maxStreak = streak;
+        }
         continue;
       }
 
@@ -131,7 +178,6 @@ export const statsService = {
     }
 
     const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    const dayMap = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     const weeklyData = dayNames.map((day, index) => {
       let totalHabits = 0;

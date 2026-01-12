@@ -11,10 +11,14 @@ export default function Modal({ isOpen, onClose, title, children, showClose = tr
     if (isOpen) {
       previousActiveElement.current = document.activeElement;
       document.body.style.overflow = 'hidden';
-      modalRef.current?.focus();
+      setTimeout(() => {
+        modalRef.current?.focus({ preventScroll: true });
+      }, 50);
     } else {
       document.body.style.overflow = 'unset';
-      previousActiveElement.current?.focus();
+      setTimeout(() => {
+        previousActiveElement.current?.focus({ preventScroll: true });
+      }, 50);
     }
 
     return () => {

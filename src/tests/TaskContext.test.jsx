@@ -5,9 +5,11 @@ import React from 'react';
 import { TaskProvider, TaskContext } from '../context/TaskContext';
 import { getToday, getTomorrow } from '../utils/dateHelpers';
 
+import { useMemo } from 'react';
+
 const TestComponent = ({ onRender }) => {
   const { tasks, addTask, toggleTask, deleteTask, currentDate, navigateDay } = React.useContext(TaskContext);
-  const todayTasks = tasks[currentDate] || [];
+  const todayTasks = useMemo(() => tasks[currentDate] || [], [tasks, currentDate]);
 
   React.useEffect(() => {
     onRender({
@@ -19,7 +21,7 @@ const TestComponent = ({ onRender }) => {
       deleteTask,
       navigateDay,
     });
-  }, [tasks, currentDate, addTask, toggleTask, deleteTask, navigateDay]);
+  }, [tasks, todayTasks, currentDate, addTask, toggleTask, deleteTask, navigateDay, onRender]);
 
   return (
     <div>
@@ -119,5 +121,44 @@ describe('TaskContext', () => {
         expect(taskAfterToggle?.done).toBe(true);
       });
     }
+  });
+
+  it('preserves tasks when navigating between days and back', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Wrapper>
+        <TestComponent onRender={(data) => { renderedData = data; }} />
+      </Wrapper>
+    );
+
+    const initialDate = renderedData.currentDate;
+    const initialTaskCount = renderedData.todayTasks.length;
+    await user.click(screen.getByText('Add Task'));
+    expect(renderedData.todayTasks.length).toBe(initialTaskCount + 1);
+
+    await user.click(screen.getByText('Next Day'));
+    expect(renderedData.currentDate).not.toBe(initialDate);
+
+    expect(renderedData.todayTasks.length).toBeGreaterThan(0);
+
+    await user.click(screen.getByText('Next Day'));
+
+    await waitFor(() => {
+      expect(renderedData.todayTasks.length).toBe(0);
+    });
+
+    await user.click(screen.getByText('Next Day'));
+    await user.click(screen.getByText('Next Day'));
+    await user.click(screen.getByText('Next Day'));
+    await user.click(screen.getByText('Next Day'));
+    await user.click(screen.getByText('Next Day'));
+    await user.click(screen.getByText('Next Day'));
+
+    expect(renderedData.currentDate).not.toBe(initialDate);
+
+    await waitFor(() => {
+      expect(renderedData.todayTasks.length).toBe(0);
+    });
   });
 });

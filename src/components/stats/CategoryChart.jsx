@@ -11,7 +11,7 @@ import Card from '../common/Card';
 export default function CategoryChart({ data }) {
   return (
     <Card variant="filled" padding="large" className="mb-6">
-      <h3 className="text-base font-medium text-md-on-surface-dark mb-4 ml-1">
+      <h3 className="text-base font-medium text-primary-text mb-4 ml-1">
         Distribución por Categoría
       </h3>
       <div className="h-64 w-full">
@@ -34,18 +34,18 @@ export default function CategoryChart({ data }) {
               contentStyle={{
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: '#2b2930',
-                boxShadow: '0 4px 8px 3px rgba(0,0,0,0.15)',
+                backgroundColor: '#1E1E1E',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
               }}
-              labelStyle={{ color: '#e6e1e5', marginBottom: '0.25rem' }}
-              itemStyle={{ color: '#c4c7c5' }}
+              labelStyle={{ color: '#E1E1E1', marginBottom: '0.25rem' }}
+              itemStyle={{ color: '#A1A1A1' }}
             />
             <Legend
               verticalAlign="bottom"
               height={36}
               iconType="circle"
               formatter={(value) => (
-                <span className="text-sm text-md-on-surface-variant-dark">{value}</span>
+                <span className="text-sm text-primary-muted">{value}</span>
               )}
             />
           </PieChart>

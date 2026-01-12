@@ -1,18 +1,18 @@
 import { useTasks } from './useTasks';
 import { statsService } from '../services/statsService';
-import { mockStats } from '../data/mockData';
 
 export function useStats() {
   const { allTasks } = useTasks();
 
   const habitStats = statsService.calculateHabitStats(allTasks);
   const weeklyHabitProgress = statsService.calculateWeeklyHabitProgress(allTasks);
+  const weeklyCompletion = statsService.calculateWeeklyCompletion(allTasks);
 
   return {
-    weeklyCompletion: mockStats.weeklyCompletion,
-    currentStreak: mockStats.streak,
+    weeklyCompletion,
+    currentStreak: habitStats.habitStreak,
     categoryDistribution: statsService.calculateCategoryDistribution(allTasks),
-    bestStreak: mockStats.bestStreak,
+    bestStreak: habitStats.habitStreak,
     habitStats,
     weeklyHabitProgress,
   };

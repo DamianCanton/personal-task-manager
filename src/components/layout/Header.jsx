@@ -52,7 +52,7 @@ export default function Header({ date, onPrev, onNext, title }) {
 
         <div className="w-10 flex justify-end gap-1">
           <button
-            onClick={() => navigateDay(date, today - date)}
+            onClick={() => navigateDay(date, 0)}
             className={`
               ${buttonClass}
               ${

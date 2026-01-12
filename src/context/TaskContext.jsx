@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext } from 'react';
+import { useState, useEffect, createContext, useRef, useCallback } from 'react';
 import { getToday, addDays, getDayOfWeek } from '../utils/dateHelpers';
 import { taskService } from '../services/taskService';
 
@@ -40,97 +40,91 @@ const getNextHabitDate = (currentDate, frequency) => {
 export function TaskProvider({ children }) {
   const [currentDate, setCurrentDate] = useState(getToday());
   const [tasks, setTasks] = useState({});
-
-  const loadTasksForDate = useCallback((date) => {
-    setTasks((prev) => {
-      if (prev[date]) return prev;
-      const loaded = taskService.getTasks(date);
-      return { ...prev, [date]: loaded };
-    });
-  }, []);
+  const loadedDatesRef = useRef(new Set());
 
   useEffect(() => {
-    loadTasksForDate(currentDate);
-    loadTasksForDate(addDays(currentDate, 1));
-  }, [currentDate, loadTasksForDate]);
+    const datesToLoad = [
+      currentDate,
+      addDays(currentDate, 1),
+      addDays(currentDate, -1),
+    ];
+
+    datesToLoad.forEach((date) => {
+      if (!loadedDatesRef.current.has(date)) {
+        const loaded = taskService.getTasks(date);
+        setTasks((prev) => ({ ...prev, [date]: loaded }));
+        loadedDatesRef.current.add(date);
+      }
+    });
+  }, [currentDate]);
 
   const getTasksForDate = useCallback((date) => {
     return tasks[date] || [];
   }, [tasks]);
 
   const addTask = useCallback((date, task) => {
-    setTasks((prev) => {
-      const currentList = prev[date] || [];
-      const newTasksForDate = [
-        ...currentList,
-        { ...task, id: Date.now().toString(), done: false },
-      ];
-      taskService.saveTasks(date, newTasksForDate);
-      return { ...prev, [date]: newTasksForDate };
-    });
-  }, []);
+    const newTask = { ...task, id: Date.now().toString(), done: false };
+    const currentList = tasks[date] || [];
+    const newTasksForDate = [...currentList, newTask];
+    
+    setTasks((prev) => ({ ...prev, [date]: newTasksForDate }));
+    taskService.saveTasks(date, newTasksForDate);
+  }, [tasks]);
 
   const toggleTask = useCallback((date, taskId) => {
-    setTasks((prev) => {
-      const currentList = prev[date] || [];
-      const taskToToggle = currentList.find((t) => t.id === taskId);
+    const currentList = tasks[date] || [];
+    const taskToToggle = currentList.find((t) => t.id === taskId);
+    
+    const newTasksForDate = currentList.map((t) =>
+      t.id === taskId ? { ...t, done: !t.done } : t
+    );
 
-      const newTasksForDate = currentList.map((t) =>
-        t.id === taskId ? { ...t, done: !t.done } : t
-      );
+    setTasks((prev) => ({ ...prev, [date]: newTasksForDate }));
+    taskService.saveTasks(date, newTasksForDate);
 
-      if (taskToToggle && !taskToToggle.done && taskToToggle.isHabit) {
-        const nextDate = getNextHabitDate(date, taskToToggle.habitFrequency);
+    if (taskToToggle && !taskToToggle.done && taskToToggle.isHabit) {
+      const nextDate = getNextHabitDate(date, taskToToggle.habitFrequency);
+      
+      setTimeout(() => {
+        setTasks((prevState) => {
+          const existingTasks = prevState[nextDate] || [];
+          const habitAlreadyExists = existingTasks.some(
+            (t) => t.title === taskToToggle.title && t.isHabit && !t.done
+          );
 
-        setTimeout(() => {
-          setTasks((prevState) => {
-            const existingTasks = prevState[nextDate] || [];
-            const habitAlreadyExists = existingTasks.some(
-              (t) => t.title === taskToToggle.title && t.isHabit && !t.done
-            );
-
-            if (!habitAlreadyExists && shouldCreateNextHabit(taskToToggle.habitFrequency, date)) {
-              const newHabit = {
-                ...taskToToggle,
-                id: Date.now().toString(),
-                done: false,
-              };
-              const updatedTasks = {
-                ...prevState,
-                [nextDate]: [...existingTasks, newHabit],
-              };
-              taskService.saveTasks(nextDate, [...existingTasks, newHabit]);
-              return updatedTasks;
-            }
-            return prevState;
-          });
-        }, 0);
-      }
-
-      taskService.saveTasks(date, newTasksForDate);
-      return { ...prev, [date]: newTasksForDate };
-    });
-  }, []);
+          if (!habitAlreadyExists && shouldCreateNextHabit(taskToToggle.habitFrequency, date)) {
+            const newHabit = {
+              ...taskToToggle,
+              id: Date.now().toString(),
+              done: false,
+            };
+            const updatedTasks = [...existingTasks, newHabit];
+            taskService.saveTasks(nextDate, updatedTasks);
+            return { ...prevState, [nextDate]: updatedTasks };
+          }
+          return prevState;
+        });
+      }, 0);
+    }
+  }, [tasks]);
 
   const deleteTask = useCallback((date, taskId) => {
-    setTasks((prev) => {
-      const currentList = prev[date] || [];
-      const newTasksForDate = currentList.filter((t) => t.id !== taskId);
-      taskService.saveTasks(date, newTasksForDate);
-      return { ...prev, [date]: newTasksForDate };
-    });
-  }, []);
+    const currentList = tasks[date] || [];
+    const newTasksForDate = currentList.filter((t) => t.id !== taskId);
+    
+    setTasks((prev) => ({ ...prev, [date]: newTasksForDate }));
+    taskService.saveTasks(date, newTasksForDate);
+  }, [tasks]);
 
   const updateTask = useCallback((date, updatedTask) => {
-    setTasks((prev) => {
-      const currentList = prev[date] || [];
-      const newTasksForDate = currentList.map((t) =>
-        t.id === updatedTask.id ? updatedTask : t
-      );
-      taskService.saveTasks(date, newTasksForDate);
-      return { ...prev, [date]: newTasksForDate };
-    });
-  }, []);
+    const currentList = tasks[date] || [];
+    const newTasksForDate = currentList.map((t) =>
+      t.id === updatedTask.id ? updatedTask : t
+    );
+    
+    setTasks((prev) => ({ ...prev, [date]: newTasksForDate }));
+    taskService.saveTasks(date, newTasksForDate);
+  }, [tasks]);
 
   const navigateDay = useCallback((offset) => {
     setCurrentDate((prev) => addDays(prev, offset));

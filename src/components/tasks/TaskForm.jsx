@@ -143,7 +143,9 @@ export default function TaskForm({
         </label>
         <div className="flex items-center gap-3">
           <div className="flex-1">
+            <label htmlFor="startTime" className="sr-only">Hora de inicio</label>
             <input
+              id="startTime"
               type="time"
               value={startTime}
               onChange={(e) => {
@@ -165,7 +167,9 @@ export default function TaskForm({
           </div>
           <span className="text-md-on-surface-variant-dark">—</span>
           <div className="flex-1">
+            <label htmlFor="endTime" className="sr-only">Hora de fin</label>
             <input
+              id="endTime"
               type="time"
               value={endTime}
               onChange={(e) => {
