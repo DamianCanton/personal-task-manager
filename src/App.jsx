@@ -51,6 +51,7 @@ function DailyView({ onEditTask }) {
         <ProgressBar progress={completion} />
       </div>
       <TaskList
+        key={currentDate}
         tasks={todayTasks}
         onToggle={(id) => toggleTask(currentDate, id)}
         onEdit={onEditTask}

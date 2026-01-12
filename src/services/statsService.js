@@ -1,41 +1,124 @@
 export const statsService = {
   calculateWeeklyCompletion(allTasksByDate) {
-    if (!allTasksByDate || Object.keys(allTasksByDate).length === 0) {
-      return [
-        { day: 'Lun', completion: 0 },
-        { day: 'Mar', completion: 0 },
-        { day: 'Mié', completion: 0 },
-        { day: 'Jue', completion: 0 },
-        { day: 'Vie', completion: 0 },
-        { day: 'Sáb', completion: 0 },
-        { day: 'Dom', completion: 0 },
-      ];
+    if (!allTasksByDate) allTasksByDate = {};
+
+    const today = new Date();
+    // Adjust to local time if needed, but Date() is usually local in browser or system.
+    // However, for strict consistency with string dates 'YYYY-MM-DD', we should be careful.
+    // Let's assume the keys 'YYYY-MM-DD' are local date strings.
+
+    const currentDay = today.getDay(); // 0 (Sun) to 6 (Sat)
+    const diffToMon = currentDay === 0 ? 6 : currentDay - 1;
+
+    // Get last Monday
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - diffToMon);
+
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      weekDates.push(`${year}-${month}-${day}`);
     }
 
-    const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-    const weeklyData = dayNames.map((day, index) => {
-      let totalTasks = 0;
-      let completedTasks = 0;
-
-      Object.entries(allTasksByDate).forEach(([date, tasks]) => {
-        const taskDate = new Date(date);
-        const jsDay = taskDate.getDay();
-        const mappedDay = jsDay === 0 ? 6 : jsDay - 1;
-
-        if (mappedDay === index) {
-          totalTasks += tasks.length;
-          completedTasks += tasks.filter((t) => t.done).length;
-        }
-      });
+    return weekDates.map((dateStr, index) => {
+      const tasks = allTasksByDate[dateStr] || [];
+      const totalTasks = tasks.length;
+      const completedTasks = tasks.filter((t) => t.done).length;
 
       return {
-        day,
-        completion: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+        day: dayNames[index],
+        completion:
+          totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
       };
     });
+  },
 
-    return weeklyData;
+  calculateGeneralStreaks(allTasksByDate) {
+    if (!allTasksByDate || Object.keys(allTasksByDate).length === 0) {
+      return { currentStreak: 0, bestStreak: 0 };
+    }
+
+    const perfectDays = new Set();
+    Object.entries(allTasksByDate).forEach(([date, tasks]) => {
+      if (tasks.length > 0 && tasks.every((t) => t.done)) {
+        perfectDays.add(date);
+      }
+    });
+
+    // Helper to get simple date string YYYY-MM-DD from Date object
+    const toDateStr = (d) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    // Calculate Best Streak
+    const sortedPerfectDays = Array.from(perfectDays).sort();
+    let maxStreak = 0;
+    let currentRun = 0;
+    let prevTimestamp = 0;
+
+    sortedPerfectDays.forEach((dateStr) => {
+      // Parse as local date components to avoid timezone shifts
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const startOfDay = new Date(y, m - 1, d).getTime();
+
+      if (currentRun === 0) {
+        currentRun = 1;
+      } else {
+        // Check if consecutive (difference of 24h roughly, safe margin 23-25h)
+        const diff = (startOfDay - prevTimestamp) / (1000 * 60 * 60 * 24);
+        if (Math.round(diff) === 1) {
+          currentRun++;
+        } else {
+          currentRun = 1;
+        }
+      }
+      if (currentRun > maxStreak) maxStreak = currentRun;
+      prevTimestamp = startOfDay;
+    });
+
+    // Calculate Current Streak
+    const today = new Date();
+    const todayStr = toDateStr(today);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = toDateStr(yesterday);
+
+    let streakEnd = null;
+    if (perfectDays.has(todayStr)) {
+      streakEnd = today;
+    } else if (perfectDays.has(yesterdayStr)) {
+      streakEnd = yesterday;
+    }
+
+    let currentStreak = 0;
+    if (streakEnd) {
+      currentStreak = 1;
+      let checkDate = new Date(streakEnd);
+      while (true) {
+        checkDate.setDate(checkDate.getDate() - 1);
+        const checkStr = toDateStr(checkDate);
+        if (perfectDays.has(checkStr)) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return {
+      currentStreak,
+      bestStreak: maxStreak,
+    };
   },
 
   calculateCategoryDistribution(allTasksByDate) {
@@ -51,23 +134,23 @@ export const statsService = {
     }, {});
 
     const CATEGORY_LABELS = {
-      work: 'Trabajo',
-      study: 'Estudio',
-      sport: 'Deporte',
-      personal: 'Personal',
+      work: "Trabajo",
+      study: "Estudio",
+      sport: "Deporte",
+      personal: "Personal",
     };
 
     const CATEGORY_COLORS = {
-      work: '#a8c7fa',
-      study: '#c2e7ff',
-      sport: '#c8e6c9',
-      personal: '#ffe0b2',
+      work: "#a8c7fa",
+      study: "#c2e7ff",
+      sport: "#c8e6c9",
+      personal: "#ffe0b2",
     };
 
     return Object.entries(counts).map(([key, value]) => ({
       name: CATEGORY_LABELS[key] || key,
       value,
-      color: CATEGORY_COLORS[key] || '#86868B',
+      color: CATEGORY_COLORS[key] || "#86868B",
     }));
   },
 
@@ -90,11 +173,18 @@ export const statsService = {
 
     const totalHabits = habits.length;
     const completedCount = completedHabits.length;
-    const habitCompletionRate = totalHabits > 0 ? Math.round((completedCount / totalHabits) * 100) : 0;
+    const habitCompletionRate =
+      totalHabits > 0 ? Math.round((completedCount / totalHabits) * 100) : 0;
 
-    const dailyHabits = habits.filter((h) => h.habitFrequency === 'daily').length;
-    const weekdayHabits = habits.filter((h) => h.habitFrequency === 'weekdays').length;
-    const weeklyHabits = habits.filter((h) => h.habitFrequency === 'weekly').length;
+    const dailyHabits = habits.filter(
+      (h) => h.habitFrequency === "daily"
+    ).length;
+    const weekdayHabits = habits.filter(
+      (h) => h.habitFrequency === "weekdays"
+    ).length;
+    const weeklyHabits = habits.filter(
+      (h) => h.habitFrequency === "weekly"
+    ).length;
 
     const habitStreak = this.calculateHabitStreak(allTasksByDate);
 
@@ -132,8 +222,10 @@ export const statsService = {
         continue;
       }
 
-      const weekdayHabits = habits.filter((h) => h.habitFrequency === 'weekdays');
-      const otherHabits = habits.filter((h) => h.habitFrequency !== 'weekdays');
+      const weekdayHabits = habits.filter(
+        (h) => h.habitFrequency === "weekdays"
+      );
+      const otherHabits = habits.filter((h) => h.habitFrequency !== "weekdays");
 
       let shouldCountDay = true;
 
@@ -167,17 +259,17 @@ export const statsService = {
   calculateWeeklyHabitProgress(allTasksByDate) {
     if (!allTasksByDate) {
       return [
-        { day: 'Lun', habits: 0, completed: 0 },
-        { day: 'Mar', habits: 0, completed: 0 },
-        { day: 'Mié', habits: 0, completed: 0 },
-        { day: 'Jue', habits: 0, completed: 0 },
-        { day: 'Vie', habits: 0, completed: 0 },
-        { day: 'Sáb', habits: 0, completed: 0 },
-        { day: 'Dom', habits: 0, completed: 0 },
+        { day: "Lun", habits: 0, completed: 0 },
+        { day: "Mar", habits: 0, completed: 0 },
+        { day: "Mié", habits: 0, completed: 0 },
+        { day: "Jue", habits: 0, completed: 0 },
+        { day: "Vie", habits: 0, completed: 0 },
+        { day: "Sáb", habits: 0, completed: 0 },
+        { day: "Dom", habits: 0, completed: 0 },
       ];
     }
 
-    const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
     const weeklyData = dayNames.map((day, index) => {
       let totalHabits = 0;
@@ -199,7 +291,10 @@ export const statsService = {
         day,
         habits: totalHabits,
         completed: completedHabits,
-        completion: totalHabits > 0 ? Math.round((completedHabits / totalHabits) * 100) : 0,
+        completion:
+          totalHabits > 0
+            ? Math.round((completedHabits / totalHabits) * 100)
+            : 0,
       };
     });
 

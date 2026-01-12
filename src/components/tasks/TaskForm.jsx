@@ -1,32 +1,32 @@
-import { useState, useEffect } from 'react';
-import { Check } from 'lucide-react';
-import { CATEGORIES, HABIT_FREQUENCIES } from '../../utils/constants';
-import Button from '../common/Button';
+import { useState, useEffect } from "react";
+import { Check } from "lucide-react";
+import { CATEGORIES, HABIT_FREQUENCIES } from "../../utils/constants";
+import Button from "../common/Button";
 
 export default function TaskForm({
   onSubmit,
   initialValues,
-  submitLabel = 'Agregar Tarea',
+  submitLabel = "Agregar Tarea",
 }) {
-  const [title, setTitle] = useState('');
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('10:00');
+  const [title, setTitle] = useState("");
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("10:00");
   const [category, setCategory] = useState(CATEGORIES[0].value);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
   const [isHabit, setIsHabit] = useState(false);
-  const [habitFrequency, setHabitFrequency] = useState('daily');
+  const [habitFrequency, setHabitFrequency] = useState("daily");
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [showHabitOptions, setShowHabitOptions] = useState(false);
 
   const resetForm = () => {
-    setTitle('');
-    setStartTime('09:00');
-    setEndTime('10:00');
+    setTitle("");
+    setStartTime("09:00");
+    setEndTime("10:00");
     setCategory(CATEGORIES[0].value);
-    setNotes('');
+    setNotes("");
     setIsHabit(false);
-    setHabitFrequency('daily');
+    setHabitFrequency("daily");
     setShowHabitOptions(false);
     setErrors({});
     setTouched({});
@@ -34,19 +34,19 @@ export default function TaskForm({
 
   useEffect(() => {
     if (initialValues) {
-      setTitle(initialValues.title || '');
-      if (initialValues.time && initialValues.time.includes('-')) {
-        const [start, end] = initialValues.time.split('-');
+      setTitle(initialValues.title || "");
+      if (initialValues.time && initialValues.time.includes("-")) {
+        const [start, end] = initialValues.time.split("-");
         setStartTime(start);
         setEndTime(end);
       } else {
-        setStartTime('09:00');
-        setEndTime('10:00');
+        setStartTime("09:00");
+        setEndTime("10:00");
       }
       setCategory(initialValues.category || CATEGORIES[0].value);
-      setNotes(initialValues.notes || '');
+      setNotes(initialValues.notes || "");
       setIsHabit(initialValues.isHabit || false);
-      setHabitFrequency(initialValues.habitFrequency || 'daily');
+      setHabitFrequency(initialValues.habitFrequency || "daily");
       setShowHabitOptions(initialValues.isHabit || false);
     } else {
       resetForm();
@@ -57,15 +57,15 @@ export default function TaskForm({
     const newErrors = {};
 
     if (!title.trim()) {
-      newErrors.title = 'El título es obligatorio';
+      newErrors.title = "El título es obligatorio";
     } else if (title.trim().length < 2) {
-      newErrors.title = 'Mínimo 2 caracteres';
+      newErrors.title = "Mínimo 2 caracteres";
     } else if (title.trim().length > 100) {
-      newErrors.title = 'Máximo 100 caracteres';
+      newErrors.title = "Máximo 100 caracteres";
     }
 
     if (startTime && endTime && startTime >= endTime) {
-      newErrors.timeRange = 'La hora de fin debe ser posterior a la de inicio';
+      newErrors.timeRange = "La hora de fin debe ser posterior a la de inicio";
     }
 
     setErrors(newErrors);
@@ -101,10 +101,10 @@ export default function TaskForm({
   };
 
   const categoryColorMap = {
-    work: '#a8c7fa',
-    study: '#c2e7ff',
-    sport: '#c8e6c9',
-    personal: '#ffe0b2',
+    work: "#a8c7fa",
+    study: "#c2e7ff",
+    sport: "#c8e6c9",
+    personal: "#ffe0b2",
   };
 
   return (
@@ -117,17 +117,18 @@ export default function TaskForm({
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          onBlur={() => handleBlur('title')}
+          onBlur={() => handleBlur("title")}
           placeholder="Ej: Reunión de diseño"
           className={`
             w-full px-4 py-3 rounded-lg
-            bg-surface-2 text-md-on-surface-dark
+            bg-surface-highlight text-primary-text
             border transition-all duration-md-short
-            placeholder:text-md-on-surface-variant-dark/50
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-md-primary-dark focus-visible:ring-offset-2 focus-visible:ring-offset-md-surface-dark
-            ${errors.title && touched.title
-              ? 'border-md-error'
-              : 'border-md-outline-dark hover:border-md-on-surface-variant-dark'
+            placeholder:text-primary-muted/50
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo focus-visible:ring-offset-2 focus-visible:ring-offset-background
+            ${
+              errors.title && touched.title
+                ? "border-md-error"
+                : "border-border-subtle hover:border-border-hover"
             }
           `}
           autoFocus
@@ -143,7 +144,9 @@ export default function TaskForm({
         </label>
         <div className="flex items-center gap-3">
           <div className="flex-1">
-            <label htmlFor="startTime" className="sr-only">Hora de inicio</label>
+            <label htmlFor="startTime" className="sr-only">
+              Hora de inicio
+            </label>
             <input
               id="startTime"
               type="time"
@@ -152,22 +155,25 @@ export default function TaskForm({
                 setStartTime(e.target.value);
                 setTouched((prev) => ({ ...prev, timeRange: true }));
               }}
-              onBlur={() => handleBlur('timeRange')}
+              onBlur={() => handleBlur("timeRange")}
               className={`
                 w-full px-3 py-2.5 rounded-lg text-center
-                bg-surface-2 text-md-on-surface-dark
+                bg-surface-highlight text-primary-text
                 border transition-all duration-md-short
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-md-primary-dark focus-visible:ring-offset-2 focus-visible:ring-offset-md-surface-dark
-                ${errors.timeRange && touched.timeRange
-                  ? 'border-md-error'
-                  : 'border-md-outline-dark'
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo focus-visible:ring-offset-2 focus-visible:ring-offset-background
+                ${
+                  errors.timeRange && touched.timeRange
+                    ? "border-md-error"
+                    : "border-border-subtle"
                 }
               `}
             />
           </div>
           <span className="text-md-on-surface-variant-dark">—</span>
           <div className="flex-1">
-            <label htmlFor="endTime" className="sr-only">Hora de fin</label>
+            <label htmlFor="endTime" className="sr-only">
+              Hora de fin
+            </label>
             <input
               id="endTime"
               type="time"
@@ -176,15 +182,16 @@ export default function TaskForm({
                 setEndTime(e.target.value);
                 setTouched((prev) => ({ ...prev, timeRange: true }));
               }}
-              onBlur={() => handleBlur('timeRange')}
+              onBlur={() => handleBlur("timeRange")}
               className={`
                 w-full px-3 py-2.5 rounded-lg text-center
-                bg-surface-2 text-md-on-surface-dark
+                bg-surface-highlight text-primary-text
                 border transition-all duration-md-short
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-md-primary-dark focus-visible:ring-offset-2 focus-visible:ring-offset-md-surface-dark
-                ${errors.timeRange && touched.timeRange
-                  ? 'border-md-error'
-                  : 'border-md-outline-dark'
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo focus-visible:ring-offset-2 focus-visible:ring-offset-background
+                ${
+                  errors.timeRange && touched.timeRange
+                    ? "border-md-error"
+                    : "border-border-subtle"
                 }
               `}
             />
@@ -208,9 +215,10 @@ export default function TaskForm({
               className={`
                 relative overflow-hidden p-3 rounded-lg border transition-all duration-md-short
                 flex items-center gap-2.5
-                ${category === cat.value
-                  ? 'bg-surface-2 border-md-primary-dark ring-1 ring-md-primary-dark/30'
-                  : 'bg-transparent border-md-outline-dark hover:bg-surface-2'
+                ${
+                  category === cat.value
+                    ? "bg-surface-2 border-md-primary-dark ring-1 ring-md-primary-dark/30"
+                    : "bg-transparent border-md-outline-dark hover:bg-surface-2"
                 }
               `}
             >
@@ -221,7 +229,11 @@ export default function TaskForm({
               <span
                 className={`
                   text-sm font-medium
-                  ${category === cat.value ? 'text-md-on-surface-dark' : 'text-md-on-surface-variant-dark'}
+                  ${
+                    category === cat.value
+                      ? "text-md-on-surface-dark"
+                      : "text-md-on-surface-variant-dark"
+                  }
                 `}
               >
                 {cat.label}
@@ -248,10 +260,10 @@ export default function TaskForm({
           rows={3}
           className={`
             w-full px-4 py-3 rounded-lg
-            bg-surface-2 text-md-on-surface-dark
-            border border-md-outline-dark transition-all duration-md-short
-            placeholder:text-md-on-surface-variant-dark/50
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-md-primary-dark focus-visible:ring-offset-2 focus-visible:ring-offset-md-surface-dark
+            bg-surface-highlight text-primary-text
+            border border-border-subtle transition-all duration-md-short
+            placeholder:text-primary-muted/50
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo focus-visible:ring-offset-2 focus-visible:ring-offset-background
             resize-none
           `}
         />
@@ -267,23 +279,31 @@ export default function TaskForm({
           className={`
             w-full p-4 rounded-lg border transition-all duration-md-short
             flex items-center gap-3
-            ${isHabit
-              ? 'bg-md-primary-dark/10 border-md-primary-dark'
-              : 'bg-transparent border-md-outline-dark hover:bg-surface-2'
+            ${
+              isHabit
+                ? "bg-md-primary-dark/10 border-md-primary-dark"
+                : "bg-transparent border-md-outline-dark hover:bg-surface-2"
             }
           `}
         >
-          <div className={`
+          <div
+            className={`
             w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
-            ${isHabit
-              ? 'bg-md-primary-dark border-md-primary-dark'
-              : 'border-md-outline-dark'
+            ${
+              isHabit
+                ? "bg-md-primary-dark border-md-primary-dark"
+                : "border-md-outline-dark"
             }
-          `}>
+          `}
+          >
             {isHabit && <Check size={14} className="text-md-on-primary-dark" />}
           </div>
           <div className="text-left">
-            <span className={`text-sm font-medium ${isHabit ? 'text-md-primary-dark' : 'text-md-on-surface-dark'}`}>
+            <span
+              className={`text-sm font-medium ${
+                isHabit ? "text-md-primary-dark" : "text-md-on-surface-dark"
+              }`}
+            >
               🔄 Repetir como hábito
             </span>
             <p className="text-xs text-md-on-surface-variant-dark mt-0.5">
@@ -306,14 +326,21 @@ export default function TaskForm({
                   className={`
                     p-3 rounded-lg border transition-all duration-md-short
                     flex items-center gap-2
-                    ${habitFrequency === freq.value
-                      ? 'bg-surface-2 border-md-primary-dark'
-                      : 'bg-transparent border-md-outline-dark hover:bg-surface-2'
+                    ${
+                      habitFrequency === freq.value
+                        ? "bg-surface-2 border-md-primary-dark"
+                        : "bg-transparent border-md-outline-dark hover:bg-surface-2"
                     }
                   `}
                 >
                   <span className="text-lg">{freq.icon}</span>
-                  <span className={`text-sm ${habitFrequency === freq.value ? 'text-md-primary-dark font-medium' : 'text-md-on-surface-variant-dark'}`}>
+                  <span
+                    className={`text-sm ${
+                      habitFrequency === freq.value
+                        ? "text-md-primary-dark font-medium"
+                        : "text-md-on-surface-variant-dark"
+                    }`}
+                  >
                     {freq.label}
                   </span>
                 </button>

@@ -4,7 +4,7 @@ import { useTasks } from "../../hooks/useTasks";
 import { getToday } from "../../utils/dateHelpers";
 
 export default function Header({ date, onPrev, onNext, title }) {
-  const { navigateDay } = useTasks();
+  const { setCurrentDate } = useTasks();
   const today = getToday();
   const isToday = date === today;
 
@@ -52,7 +52,7 @@ export default function Header({ date, onPrev, onNext, title }) {
 
         <div className="w-10 flex justify-end gap-1">
           <button
-            onClick={() => navigateDay(date, 0)}
+            onClick={() => setCurrentDate(getToday())}
             className={`
               ${buttonClass}
               ${
