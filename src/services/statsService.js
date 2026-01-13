@@ -164,6 +164,7 @@ export const statsService = {
         weekdayHabits: 0,
         weeklyHabits: 0,
         habitStreak: 0,
+        currentHabitStreak: 0,
       };
     }
 
@@ -187,6 +188,7 @@ export const statsService = {
     ).length;
 
     const habitStreak = this.calculateHabitStreak(allTasksByDate);
+    const currentHabitStreak = this.calculateCurrentHabitStreak(allTasksByDate);
 
     return {
       totalHabits,
@@ -195,10 +197,12 @@ export const statsService = {
       dailyHabits,
       weekdayHabits,
       weeklyHabits,
-      habitStreak,
+      habitStreak, // Máxima racha histórica
+      currentHabitStreak, // Racha activa actual
     };
   },
 
+  // Calcula la MÁXIMA racha de hábitos histórica (no necesariamente activa)
   calculateHabitStreak(allTasksByDate) {
     if (!allTasksByDate) return 0;
 
@@ -256,6 +260,84 @@ export const statsService = {
     return Math.max(streak, maxStreak);
   },
 
+  // Calcula la racha de hábitos ACTUAL (debe incluir hoy o ayer para ser válida)
+  calculateCurrentHabitStreak(allTasksByDate) {
+    if (!allTasksByDate) return 0;
+
+    const toDateStr = (d) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const today = new Date();
+    const todayStr = toDateStr(today);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = toDateStr(yesterday);
+
+    // Determinar si hay una racha activa (hoy o ayer debe estar perfecto)
+    const checkHabitCompletion = (dateStr) => {
+      const tasks = allTasksByDate[dateStr] || [];
+      const habits = tasks.filter((t) => t.isHabit);
+      
+      if (habits.length === 0) return false;
+      
+      const completedHabits = habits.filter((h) => h.done);
+      return completedHabits.length === habits.length;
+    };
+
+    let streakEnd = null;
+    if (checkHabitCompletion(todayStr)) {
+      streakEnd = today;
+    } else if (checkHabitCompletion(yesterdayStr)) {
+      streakEnd = yesterday;
+    }
+
+    if (!streakEnd) return 0;
+
+    // Contar hacia atrás desde el último día perfecto
+    let currentStreak = 1;
+    let checkDate = new Date(streakEnd);
+    
+    while (true) {
+      checkDate.setDate(checkDate.getDate() - 1);
+      const checkStr = toDateStr(checkDate);
+      
+      const tasks = allTasksByDate[checkStr] || [];
+      const habits = tasks.filter((t) => t.isHabit);
+      
+      // Manejar días sin hábitos o weekends para hábitos weekdays-only
+      if (habits.length === 0) {
+        break;
+      }
+
+      const taskDate = new Date(checkStr);
+      const jsDay = taskDate.getDay();
+      const isWeekend = jsDay === 0 || jsDay === 6;
+
+      const weekdayHabits = habits.filter((h) => h.habitFrequency === "weekdays");
+      const otherHabits = habits.filter((h) => h.habitFrequency !== "weekdays");
+
+      // Si solo hay hábitos weekdays y es fin de semana, no rompe la racha
+      if (weekdayHabits.length > 0 && otherHabits.length === 0 && isWeekend) {
+        continue;
+      }
+
+      const completedHabits = habits.filter((h) => h.done);
+      if (completedHabits.length === habits.length) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+
+    return currentStreak;
+  },
+
+  // Agrega TODOS los hábitos históricos por día de la semana
+  // (ej: suma todos los Lunes históricos, todos los Martes históricos, etc.)
   calculateWeeklyHabitProgress(allTasksByDate) {
     if (!allTasksByDate) {
       return [
@@ -299,5 +381,57 @@ export const statsService = {
     });
 
     return weeklyData;
+  },
+
+  // Calcula progreso de hábitos SOLO para la semana actual (Lun-Dom)
+  calculateCurrentWeekHabitProgress(allTasksByDate) {
+    if (!allTasksByDate) {
+      return [
+        { day: "Lun", habits: 0, completed: 0, completion: 0 },
+        { day: "Mar", habits: 0, completed: 0, completion: 0 },
+        { day: "Mié", habits: 0, completed: 0, completion: 0 },
+        { day: "Jue", habits: 0, completed: 0, completion: 0 },
+        { day: "Vie", habits: 0, completed: 0, completion: 0 },
+        { day: "Sáb", habits: 0, completed: 0, completion: 0 },
+        { day: "Dom", habits: 0, completed: 0, completion: 0 },
+      ];
+    }
+
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 (Sun) to 6 (Sat)
+    const diffToMon = currentDay === 0 ? 6 : currentDay - 1;
+
+    // Get last Monday
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - diffToMon);
+
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      weekDates.push(`${year}-${month}-${day}`);
+    }
+
+    const dayNames = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+    return weekDates.map((dateStr, index) => {
+      const tasks = allTasksByDate[dateStr] || [];
+      const dayHabits = tasks.filter((t) => t.isHabit);
+      const completedHabits = dayHabits.filter((h) => h.done).length;
+      const totalHabits = dayHabits.length;
+
+      return {
+        day: dayNames[index],
+        habits: totalHabits,
+        completed: completedHabits,
+        completion:
+          totalHabits > 0
+            ? Math.round((completedHabits / totalHabits) * 100)
+            : 0,
+      };
+    });
   },
 };

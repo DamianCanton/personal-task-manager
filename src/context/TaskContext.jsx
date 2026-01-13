@@ -147,6 +147,69 @@ export function TaskProvider({ children }) {
     [tasks]
   );
 
+  // Editar todas las instancias futuras de un hábito
+  const updateAllFutureHabits = useCallback(
+    (currentDate, habitTask, updatedData) => {
+      // Encontrar todas las fechas con instancias del mismo hábito
+      const allDates = Object.keys(tasks);
+      const futureDates = allDates.filter((date) => date >= currentDate);
+
+      const updatedTasks = { ...tasks };
+
+      futureDates.forEach((date) => {
+        const dateTasks = tasks[date] || [];
+        const updatedDateTasks = dateTasks.map((t) => {
+          // Identificar hábitos por título y isHabit (matching logic)
+          if (
+            t.isHabit &&
+            t.title === habitTask.title &&
+            t.habitFrequency === habitTask.habitFrequency
+          ) {
+            return { ...t, ...updatedData, id: t.id }; // Mantener ID único
+          }
+          return t;
+        });
+
+        updatedTasks[date] = updatedDateTasks;
+        taskService.saveTasks(date, updatedDateTasks);
+      });
+
+      setTasks(updatedTasks);
+    },
+    [tasks]
+  );
+
+  // Eliminar todas las instancias futuras de un hábito
+  const deleteAllFutureHabits = useCallback(
+    (currentDate, habitTask) => {
+      const allDates = Object.keys(tasks);
+      const futureDates = allDates.filter((date) => date >= currentDate);
+
+      const updatedTasks = { ...tasks };
+
+      futureDates.forEach((date) => {
+        const dateTasks = tasks[date] || [];
+        const filteredDateTasks = dateTasks.filter((t) => {
+          // Eliminar instancias que coincidan
+          if (
+            t.isHabit &&
+            t.title === habitTask.title &&
+            t.habitFrequency === habitTask.habitFrequency
+          ) {
+            return false; // Eliminar
+          }
+          return true; // Mantener
+        });
+
+        updatedTasks[date] = filteredDateTasks;
+        taskService.saveTasks(date, filteredDateTasks);
+      });
+
+      setTasks(updatedTasks);
+    },
+    [tasks]
+  );
+
   const navigateDay = useCallback((offset) => {
     setCurrentDate((prev) => addDays(prev, offset));
   }, []);
@@ -154,11 +217,15 @@ export function TaskProvider({ children }) {
   const value = {
     currentDate,
     tasks,
+    todayTasks: tasks[currentDate] || [],
+    allTasks: tasks,
     getTasksForDate,
     addTask,
     toggleTask,
     deleteTask,
     updateTask,
+    updateAllFutureHabits,
+    deleteAllFutureHabits,
     navigateDay,
     setCurrentDate,
   };

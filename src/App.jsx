@@ -15,20 +15,15 @@ import CategoryChart from "./components/stats/CategoryChart";
 import Modal from "./components/common/Modal";
 import TaskForm from "./components/tasks/TaskForm";
 import ProgressBar from "./components/common/ProgressBar";
+import HabitActionModal from "./components/common/HabitActionModal";
 import { AnimatePresence, motion } from "framer-motion";
 
-function DailyView({ onEditTask }) {
-  const { currentDate, todayTasks, toggleTask, deleteTask } = useTasks();
+function DailyView({ onEditTask, onDeleteTask }) {
+  const { currentDate, todayTasks, toggleTask } = useTasks();
   const completion =
     todayTasks.length > 0
       ? (todayTasks.filter((t) => t.done).length / todayTasks.length) * 100
       : 0;
-
-  const handleDelete = (task) => {
-    if (window.confirm("¿Eliminar esta tarea permanentemente?")) {
-      deleteTask(currentDate, task.id);
-    }
-  };
 
   return (
     <motion.div
@@ -55,7 +50,7 @@ function DailyView({ onEditTask }) {
         tasks={todayTasks}
         onToggle={(id) => toggleTask(currentDate, id)}
         onEdit={onEditTask}
-        onDelete={handleDelete}
+        onDelete={onDeleteTask}
       />
     </motion.div>
   );
@@ -85,13 +80,19 @@ function StatsView() {
   );
 }
 
-function TaskModal({ isOpen, onClose, targetDate, initialTask }) {
-  const { addTask, updateTask, getTasksForDate } = useTasks();
+function TaskModal({ isOpen, onClose, targetDate, initialTask, editFuture }) {
+  const { addTask, updateTask, updateAllFutureHabits, getTasksForDate } = useTasks();
   const dayTasks = targetDate ? getTasksForDate(targetDate) : [];
 
   const handleTaskSubmit = (taskData) => {
     if (initialTask) {
-      updateTask(targetDate, { ...initialTask, ...taskData });
+      if (editFuture && initialTask.isHabit) {
+        // Editar todas las instancias futuras del hábito
+        updateAllFutureHabits(targetDate, initialTask, taskData);
+      } else {
+        // Editar solo esta instancia
+        updateTask(targetDate, { ...initialTask, ...taskData });
+      }
     } else {
       addTask(targetDate, taskData);
     }
@@ -99,7 +100,9 @@ function TaskModal({ isOpen, onClose, targetDate, initialTask }) {
   };
 
   const title = initialTask
-    ? "Editar Tarea"
+    ? editFuture
+      ? `Editar Hábito (todas las instancias futuras)`
+      : "Editar Tarea"
     : targetDate
     ? `Planificar para ${getPrettyDate(targetDate)}`
     : "Nueva Tarea";
@@ -149,7 +152,19 @@ function MainApp() {
     date: null,
     task: null,
   });
-  const { currentDate } = useTasks();
+  const [habitModalState, setHabitModalState] = useState({
+    isOpen: false,
+    task: null,
+    actionType: null, // 'edit' or 'delete'
+  });
+  
+  const { 
+    currentDate, 
+    deleteTask, 
+    updateTask,
+    updateAllFutureHabits,
+    deleteAllFutureHabits,
+  } = useTasks();
 
   const openAddModal = () => {
     const today = getToday();
@@ -158,18 +173,81 @@ function MainApp() {
   };
 
   const openEditModal = (task) => {
-    setModalState({ isOpen: true, date: currentDate, task: task });
+    if (task.isHabit) {
+      // Si es hábito, abrir modal de confirmación
+      setHabitModalState({
+        isOpen: true,
+        task: task,
+        actionType: 'edit',
+      });
+    } else {
+      // Si es tarea normal, editar directamente
+      setModalState({ isOpen: true, date: currentDate, task: task });
+    }
+  };
+
+  const handleDeleteTask = (task) => {
+    if (task.isHabit) {
+      // Si es hábito, abrir modal de confirmación
+      setHabitModalState({
+        isOpen: true,
+        task: task,
+        actionType: 'delete',
+      });
+    } else {
+      // Si es tarea normal, confirmar y eliminar
+      if (window.confirm("¿Eliminar esta tarea permanentemente?")) {
+        deleteTask(currentDate, task.id);
+      }
+    }
+  };
+
+  const handleHabitAction = (scope) => {
+    const { task, actionType } = habitModalState;
+
+    if (actionType === 'delete') {
+      if (scope === 'single') {
+        deleteTask(currentDate, task.id);
+      } else if (scope === 'future') {
+        deleteAllFutureHabits(currentDate, task);
+      }
+    } else if (actionType === 'edit') {
+      if (scope === 'single') {
+        // Abrir modal de edición para instancia única
+        setModalState({ isOpen: true, date: currentDate, task: task });
+      } else if (scope === 'future') {
+        // Abrir modal de edición pero marcado como "future edit"
+        setModalState({ 
+          isOpen: true, 
+          date: currentDate, 
+          task: task,
+          editFuture: true,
+        });
+      }
+    }
   };
 
   const handleCloseModal = () => {
-    setModalState((prev) => ({ ...prev, isOpen: false }));
+    setModalState((prev) => ({ ...prev, isOpen: false, editFuture: false }));
+  };
+
+  const handleCloseHabitModal = () => {
+    setHabitModalState({
+      isOpen: false,
+      task: null,
+      actionType: null,
+    });
   };
 
   return (
     <div className="min-h-screen font-sans text-primary-text selection:bg-accent-indigo/30">
       <AnimatePresence mode="wait">
         {activeTab === "today" ? (
-          <DailyView key="today" onEditTask={openEditModal} />
+          <DailyView 
+            key="today" 
+            onEditTask={openEditModal}
+            onDeleteTask={handleDeleteTask}
+          />
         ) : (
           <StatsView key="stats" />
         )}
@@ -197,6 +275,15 @@ function MainApp() {
         onClose={handleCloseModal}
         targetDate={modalState.date}
         initialTask={modalState.task}
+        editFuture={modalState.editFuture}
+      />
+
+      <HabitActionModal
+        isOpen={habitModalState.isOpen}
+        onClose={handleCloseHabitModal}
+        onAction={handleHabitAction}
+        habitTitle={habitModalState.task?.title || ''}
+        actionType={habitModalState.actionType}
       />
     </div>
   );

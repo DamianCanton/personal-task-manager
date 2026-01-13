@@ -17,6 +17,8 @@ export function useTasks() {
     toggleTask: context.toggleTask,
     deleteTask: context.deleteTask,
     updateTask: context.updateTask,
+    updateAllFutureHabits: context.updateAllFutureHabits,
+    deleteAllFutureHabits: context.deleteAllFutureHabits,
     navigateDay: context.navigateDay,
     setCurrentDate: context.setCurrentDate,
     getTasksForDate: context.getTasksForDate,
