@@ -100,11 +100,12 @@ export default function TaskForm({
     }
   };
 
+  // Usa el MISMO mapa de colores que tailwind.config.js para consistencia
   const categoryColorMap = {
-    work: "#a8c7fa",
-    study: "#c2e7ff",
-    sport: "#c8e6c9",
-    personal: "#ffe0b2",
+    work: "#818cf8", // Indigo - DEBE ser igual a TaskCard y tailwind.config.js
+    study: "#c084fc", // Purple
+    sport: "#34d399", // Emerald
+    personal: "#fb7185", // Rose
   };
 
   return (
@@ -122,12 +123,12 @@ export default function TaskForm({
           className={`
             w-full px-4 py-3 rounded-lg
             bg-surface-highlight text-primary-text
-            border transition-all duration-md-short
-            placeholder:text-primary-muted/50
+            border transition-all duration-200
+            placeholder:text-primary-muted/70
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-indigo focus-visible:ring-offset-2 focus-visible:ring-offset-background
             ${
               errors.title && touched.title
-                ? "border-md-error"
+                ? "border-red-500"
                 : "border-border-subtle hover:border-border-hover"
             }
           `}

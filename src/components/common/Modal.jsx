@@ -81,14 +81,14 @@ export default function Modal({ isOpen, onClose, title, children, showClose = tr
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ duration: 0.2, easing: [0.2, 0, 0, 1] }}
             tabIndex={-1}
-            className="relative w-full max-w-md bg-surface-1 rounded-lg shadow-md-4 overflow-hidden"
+            className="relative w-full max-w-md bg-surface rounded-3xl shadow-bento overflow-hidden"
           >
             {(title || showClose) && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-md-outline-dark/10">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
                 {title && (
                   <h2
                     id="modal-title"
-                    className="text-lg font-medium text-md-on-surface-dark"
+                    className="text-lg font-medium text-primary-text"
                   >
                     {title}
                   </h2>
@@ -96,8 +96,8 @@ export default function Modal({ isOpen, onClose, title, children, showClose = tr
                 {showClose && (
                   <button
                     onClick={onClose}
-                    className="p-2 -m-2 rounded-full text-md-on-surface-variant-dark hover:bg-surface-2 transition-colors"
-                    aria-label="Cerrar"
+                    className="p-2 -m-2 rounded-full text-primary-muted hover:text-primary-text hover:bg-surface-highlight transition-colors"
+                    aria-label="Cerrar modal"
                   >
                     <X size={20} />
                   </button>
