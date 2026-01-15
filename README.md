@@ -81,7 +81,3 @@ Los colores siguen el sistema de Material Design 3 con tokens semánticos:
 
 ### Persistencia
 Los datos se almacenan en `localStorage` bajo las claves `tasks_YYYY-MM-DD`.
-
-## Licencia
-
-MIT
